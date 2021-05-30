@@ -20,58 +20,12 @@ interface Product {
 const Cart = (): JSX.Element => {
 	const { cart, removeProduct, updateProductAmount } = useCart();
 
-	const cartFormatted = cart.map((product, key) => {
-		const { amount, image, price, title } = product;
-		return (
-			<tr key={key} data-testid="product">
-				<td>
-					<img src={image} alt={title} />
-				</td>
-				<td>
-					<strong>{title}</strong>
-					<span>{formatPrice(price)}</span>
-				</td>
-				<td>
-					<div>
-						<button
-							type="button"
-							data-testid="decrement-product"
-							disabled={amount <= 1}
-							onClick={() => handleProductDecrement(product)}
-						>
-							<MdRemoveCircleOutline size={20} />
-						</button>
-						<input
-							type="text"
-							data-testid="product-amount"
-							readOnly
-							style={{ textAlign: "center" }}
-							value={amount}
-						/>
-						<button
-							type="button"
-							data-testid="increment-product"
-							onClick={() => handleProductIncrement(product)}
-						>
-							<MdAddCircleOutline size={20} />
-						</button>
-					</div>
-				</td>
-				<td>
-					<strong>{formatPrice(price)}</strong>
-				</td>
-				<td>
-					<button
-						type="button"
-						data-testid="remove-product"
-						onClick={() => handleRemoveProduct(product.id)}
-					>
-						<MdDelete size={20} />
-					</button>
-				</td>
-			</tr>
-		);
-	});
+	const cartFormatted = cart.map((product) => ({
+		...product,
+		priceFormatted: formatPrice(product.price),
+		subtotal: formatPrice(product.price * product.amount),
+	}));
+
 	const total = formatPrice(
 		cart.reduce((sumTotal, product) => {
 			return (sumTotal += product.price * product.amount);
@@ -104,7 +58,60 @@ const Cart = (): JSX.Element => {
 						<th aria-label="delete icon" />
 					</tr>
 				</thead>
-				<tbody>{cartFormatted}</tbody>
+				<tbody>
+					{cartFormatted.map((product) => {
+						const { amount, image, title, priceFormatted, subtotal } = product;
+						return (
+							<tr key={product.id} data-testid="product">
+								<td>
+									<img src={image} alt={title} />
+								</td>
+								<td>
+									<strong>{title}</strong>
+									<span>{subtotal}</span>
+								</td>
+								<td>
+									<div>
+										<button
+											type="button"
+											data-testid="decrement-product"
+											disabled={amount <= 1}
+											onClick={() => handleProductDecrement(product)}
+										>
+											<MdRemoveCircleOutline size={20} />
+										</button>
+										<input
+											type="text"
+											data-testid="product-amount"
+											readOnly
+											style={{ textAlign: "center" }}
+											value={amount}
+										/>
+										<button
+											type="button"
+											data-testid="increment-product"
+											onClick={() => handleProductIncrement(product)}
+										>
+											<MdAddCircleOutline size={20} />
+										</button>
+									</div>
+								</td>
+								<td>
+									<strong>{priceFormatted}</strong>
+								</td>
+								<td>
+									<button
+										type="button"
+										data-testid="remove-product"
+										onClick={() => handleRemoveProduct(product.id)}
+									>
+										<MdDelete size={20} />
+									</button>
+								</td>
+							</tr>
+						);
+					})}
+				</tbody>
 			</ProductTable>
 
 			<footer>
